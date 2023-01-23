@@ -194,31 +194,6 @@ class ParameterTest extends TestCase
                     ]
                 ]
             ],
-            'iterable' => [
-                \ParameterTestClassSeven::class,
-                [
-                    [
-                        'type' => null,
-                        'isOptional' => false,
-                        'defaultValue' => null
-                    ],
-                    [
-                        'type' => 'iterable',
-                        'isOptional' => false,
-                        'defaultValue' => null
-                    ],
-                    [
-                        'type' => null,
-                        'isOptional' => true,
-                        'defaultValue' => null
-                    ],
-                    [
-                        'type' => 'iterable',
-                        'isOptional' => true,
-                        'defaultValue' => null
-                    ]
-                ]
-            ],
         ];
     }
 
@@ -232,6 +207,87 @@ class ParameterTest extends TestCase
             $parameter = new Parameter($i, $p);
             $data = $parameter->getData();
             $this->assertNull($parameter->getClass());
+            $this->assertEquals($expectedData[$i]['defaultValue'], $parameter->getDefaultValue());
+            $this->assertEquals($expectedData[$i], $data, 'Parameter #' . $i . " ({$p->name})");
+        }
+    }
+
+    /**
+     * iterable pseudo-type was removed in PHP8.2.
+     *
+     * https://www.php.net/manual/en/language.types.iterable.php
+     */
+    public function test_parameter_build_for_iterable_pseudo_type() {
+        if (PHP_VERSION_ID >= 82000) {
+            $this->markTestSkipped();
+        }
+
+        $expectedData = [
+            [
+                'type' => null,
+                'isOptional' => false,
+                'defaultValue' => null
+            ],
+            [
+                'type' => 'iterable',
+                'isOptional' => false,
+                'defaultValue' => null
+            ],
+            [
+                'type' => null,
+                'isOptional' => true,
+                'defaultValue' => null
+            ],
+            [
+                'type' => 'iterable',
+                'isOptional' => true,
+                'defaultValue' => null
+            ]
+        ];
+
+        $reflectionConstructor = new ReflectionMethod(\ParameterTestClassSeven::class, '__construct');
+        foreach ($reflectionConstructor->getParameters() as $i => $p) {
+            $parameter = new Parameter($i, $p);
+            $data = $parameter->getData();
+            $this->assertNull($parameter->getClass());
+            $this->assertEquals($expectedData[$i]['defaultValue'], $parameter->getDefaultValue());
+            $this->assertEquals($expectedData[$i], $data, 'Parameter #' . $i . " ({$p->name})");
+        }
+    }
+
+    public function test_parameter_build_for_traversable() {
+        if (PHP_VERSION_ID > 82000) {
+            $this->markTestSkipped();
+        }
+
+        $expectedData = [
+            [
+                'type' => null,
+                'isOptional' => false,
+                'defaultValue' => null
+            ],
+            [
+                'type' => 'Traversable',
+                'isOptional' => false,
+                'defaultValue' => null
+            ],
+            [
+                'type' => null,
+                'isOptional' => true,
+                'defaultValue' => null
+            ],
+            [
+                'type' => 'Traversable',
+                'isOptional' => true,
+                'defaultValue' => null
+            ]
+        ];
+
+        $reflectionConstructor = new ReflectionMethod(\ParameterTestClassNine::class, '__construct');
+        foreach ($reflectionConstructor->getParameters() as $i => $p) {
+            $parameter = new Parameter($i, $p);
+            $data = $parameter->getData();
+            //$this->assertNull($parameter->getClass());
             $this->assertEquals($expectedData[$i]['defaultValue'], $parameter->getDefaultValue());
             $this->assertEquals($expectedData[$i], $data, 'Parameter #' . $i . " ({$p->name})");
         }

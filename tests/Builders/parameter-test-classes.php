@@ -55,3 +55,10 @@ class ParameterTestClassEight
     {
     }
 }
+
+class ParameterTestClassNine
+{
+    public function __construct($one, iterable $two, $three = null, iterable $four = null)
+    {
+    }
+}
